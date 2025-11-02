@@ -1,0 +1,19 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/index.tsx --bundle --outfile=dist/app.js --minify --target=chrome140,edge140",
+    "lint": "eslint",
+    "dev": "esbuild src/index.tsx --bundle --outfile=dist/app.js --sourcemap --target=chrome140,edge140 --watch"
+  },
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/react-dom": "19.2.2",
+    "esbuild": "0.25.11",
+    "eslint": "9.39.0",
+    "eslint-plugin-react-hooks": "7.0.1",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,3 +1,6 @@
 .DS_Store
-camera/
 .env.local
+camera/
+node_modules/
+frontend/dist/
+frontend/build/

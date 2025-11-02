@@ -13,9 +13,20 @@ if [ -z "$GEMINI_API_KEY" ]; then
   exit 1
 fi
 
-exit 1
+if [ -z "$1" ]; then
+  echo "Usage: $0 <model_name> <image_file_path>"
+  exit 1
+fi
 
-curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent" \
+if [ -z "$2" ]; then
+  echo "Usage: $0 <model_name> <image_file_path>"
+  exit 1
+fi
+
+MODEL_NAME=$1
+IMAGE_FILE=$2
+
+curl --silent "https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent" \
   -H "Content-Type: application/json" \
   -H "X-goog-api-key: $GEMINI_API_KEY" \
   -X POST \
@@ -26,11 +37,11 @@ curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:g
           {
             "inline_data": {
               "mime_type": "image/jpeg",
-              "data": "'"$(base64 --input ./camera/1.jpg)"'"
+              "data": "'"$(base64 --input "$IMAGE_FILE")"'"
             }
           },
           {
-            "text": "Transcribe the handwritten cursive text on the page in this image."
+            "text": "Transcribe the handwritten cursive text on the page in this image. Provide only the transcribed text without any additional commentary."
           }
         ]
       }
