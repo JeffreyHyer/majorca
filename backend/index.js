@@ -2,6 +2,7 @@ import Koa from 'koa'
 import KoaRouter from '@koa/router'
 import koaBody from 'koa-body'
 import database from './middleware/database.js'
+import cors from './middleware/cors.js'
 import registerRoutes from './routes/index.js'
 
 const app = new Koa()
@@ -10,6 +11,7 @@ const router = new KoaRouter()
 registerRoutes(router)
 
 app.use(database)
+   .use(cors)
    .use(koaBody())
    .use(router.routes())
 

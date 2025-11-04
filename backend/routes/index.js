@@ -1,5 +1,5 @@
 import { getAuthors, getAuthor, postAuthor, putAuthor, deleteAuthor } from './authors.js'
-import { getPages, getPage } from './pages.js'
+import { getPages, getPage, postPage, patchPage } from './pages.js'
 
 export default function (router) {
   router.get('/', async (ctx) => {
@@ -13,8 +13,15 @@ export default function (router) {
   router.get('/authors/:id', getAuthor)
   router.post('/author', postAuthor)
   router.put('/author/:id', putAuthor)
-  router.delete('/author/:id', deleteAuthor)
+  // router.delete('/author/:id', deleteAuthor)
 
-  router.get('/journal/:journal_id/pages', getPages)
-  router.get('/journal/:journal_id/pages/:page_id', getPage)
+  // router.get('/journals', getJournals)
+  // router.get('/journals/:id', getJournal)
+  // router.post('/journals', postJournal)
+  // router.patch('/journals/:id', patchJournal)
+
+  router.get('/journals/:journal_id/pages', getPages)
+  router.get('/journals/:journal_id/pages/:id', getPage)
+  router.post('/journals/:journal_id/pages', postPage)
+  router.patch('/journals/:journal_id/pages/:id', patchPage)
 }
