@@ -1,33 +1,27 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { KeyboardEvent, MouseEvent } from 'react'
+import { getJournalPage } from './utils/api.ts'
 
 const App = () => {
   const [activeLineNumber, setActiveLineNumber] = useState<number>(1)
-
-  const [first, setFirst] = useState<string>(`Line one has some text on it
-line two is a continuation of that line.
-
-Line four is somewhere in the middle of a rather long
-paragraph of text. Hopefully that all makes sense
-and fits on the screen.`)
-  const [second, setSecond] = useState<string>(`Line one has some text on it
-line two is a continuation of that line.
-
-Line four is somewhere in the middle of a rather long
-paragraph of text. Hopefully that all makes sense
-and fits on the screen.
-
-This is line eight. Maybe it's getting too long? Not
-quite. Perfect. We should have plenty of room for a
-journal entry then. Line length may be a problem
-but I think we can make it work by adjusting the font
-size.`)
+  const [journalId, setJournalId] = useState<string>('october_1990')
+  const [pageId, setPageId] = useState<string>('1_1')
+  const [first, setFirst] = useState<string>('')
+  const [second, setSecond] = useState<string>('')
   const [third, setThird] = useState<string>('')
 
   const moveLineMarker = (event: KeyboardEvent<HTMLTextAreaElement> | MouseEvent<HTMLTextAreaElement>) => {
     const target = event.target as HTMLTextAreaElement
     setActiveLineNumber(target.selectionEnd === 0 ? 1 : target.value.substring(0, target.selectionEnd).split('\n').length)
   }
+
+  useEffect(() => {
+    getJournalPage(journalId, pageId).then(data => {
+      setFirst(data.ocr_results?.[0]?.text ?? '')
+      setSecond(data.ocr_results?.[1]?.text ?? '')
+      setThird(data.text ?? '')
+    })
+  }, [])
 
   return (
     <div className="container">
