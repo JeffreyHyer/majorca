@@ -24,12 +24,12 @@ export const getJournalPage = async (journalId: string, pageId: string) => {
   return get(`journals/${journalId}/pages/${pageId}`)
 }
 
-export const postJournalPage = async (journalId: string, data: any) => {
+export const postJournalPage = async (journalId: string, data: JournalPage) => {
   return post(`journals/${journalId}/pages`, data)
 }
 
-export const putJournalPage = async (journalId: string, pageId: string, data: any) => {
-  return put(`journals/${journalId}/pages/${pageId}`, data)
+export const patchJournalPage = async (journalId: string, pageId: string, data: Partial<Omit<JournalPage, "id">>) => {
+  return patch(`journals/${journalId}/pages/${pageId}`, data)
 }
 
 const get = async (url: string) => {
@@ -70,4 +70,13 @@ const del = async (url: string) => {
   return fetch(`${API_BASE_URL}${url}`, {
     method: 'DELETE'
   }).then(response => response.json())
+}
+
+interface JournalPage {
+  id: string
+  text: string
+  start_date: string
+  end_date: string
+  locked: boolean
+  completed: boolean
 }
