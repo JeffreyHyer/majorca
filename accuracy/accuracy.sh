@@ -8,7 +8,8 @@ fi
 MODEL_NAME=$1
 
 WORDS_CORRECT=$(\
-  git diff --no-index --word-diff=plain ./$MODEL_NAME.txt ./truth.txt | tail -n +6 \
+  git diff --no-index --word-diff=plain ./$MODEL_NAME.txt ./truth.txt
+  | tail -n +6 \
   | sed -E 's/\[-[^-]+-\]//g' \
   | sed -E 's/\{\+[^\+]+\+\}//g' \
   | wc -w\
