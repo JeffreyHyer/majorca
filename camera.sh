@@ -42,7 +42,10 @@ if [ -z "$JOURNAL" ]; then
 fi
 if [ ! -d ./camera/$JOURNAL ]; then
   mkdir -p ./camera/$JOURNAL/ocr
+  mkdir -p ./camera/$JOURNAL/orig
 fi
+
+LAST_FILE_ON_DEVICE=$(adb shell ls -t /sdcard/DCIM/Camera | grep ".jpg" | head -n 1)
 
 # Take a photo with the camera
 # if [ "$STEP" -lt 1 ]; then
@@ -51,8 +54,8 @@ fi
 # fi
 
 # Wait until the user hits a key before taking the photo
-# read -n 1 -s -r -p "Press any key to continue..."
-# echo ""
+read -n 1 -s -r -p "Press any key to take a photo..."
+echo ""
 
 # Focus the camera
 # adb shell input keyevent 27
@@ -63,8 +66,15 @@ if [ "$STEP" -lt 2 ]; then
   # save_progress 2
 fi
 
-read -n 1 -s -r -p "Press any key to continue..."
-echo ""
+FOUND=false
+while ! $FOUND; do
+  echo "Waiting for photo to be saved on device..."
+  sleep 0.5
+  LATEST_FILE=$(adb shell ls -t /sdcard/DCIM/Camera | grep ".jpg" | head -n 1)
+  if [ "$LATEST_FILE" != "$LAST_FILE_ON_DEVICE" ]; then
+    FOUND=true
+  fi
+done
 
 # Find the most recent photo taken
 FILE=$(adb shell ls -t /sdcard/DCIM/Camera | grep ".jpg" | head -n 1)
@@ -73,17 +83,27 @@ FILE=$(adb shell ls -t /sdcard/DCIM/Camera | grep ".jpg" | head -n 1)
 if [ "$STEP" -lt 3 ]; then
   SEQUENCE=$(find ./camera/$JOURNAL -maxdepth 1 -name "*.jpg" | wc -l)
   SEQUENCE=$((SEQUENCE + 1))
-  adb pull /sdcard/DCIM/Camera/$FILE ./camera/$JOURNAL/${SEQUENCE}_orig.jpg
+  adb pull /sdcard/DCIM/Camera/$FILE ./camera/$JOURNAL/orig/${SEQUENCE}.jpg
   # save_progress 3
 fi
 
-# Wait for the file to download
-read -n 1 -s -r -p "Press any key to continue..."
-echo ""
+FOUND=false
+while ! $FOUND; do
+  echo "Waiting for photo to be downloaded from device..."
+  sleep 0.5
+  if [ -f "./camera/$JOURNAL/orig/${SEQUENCE}.jpg" ]; then
+    FOUND=true
+  fi
+done
 
 # Rotate the image 90 degrees counter-clockwise, resize to 50% of original size, sharpen, convert to grayscale with a 75% threshold, split the image in half vertically, and save the two halves as separate files
 if [ "$STEP" -lt 4 ]; then
-  magick "./camera/$JOURNAL/${SEQUENCE}_orig.jpg" -rotate -90 -resize 50% -sharpen 0x1.0 -colorspace gray -threshold 75% -crop "50%x100%" +repage "./camera/$JOURNAL/ocr/${SEQUENCE}_%d.jpg"
-  magick "./camera/$JOURNAL/${SEQUENCE}_orig.jpg" -rotate -90 -resize 50% -sharpen 0x1.0 "./camera/$JOURNAL/${SEQUENCE}_orig.jpg"
+  magick "./camera/$JOURNAL/orig/${SEQUENCE}.jpg" -rotate -90 -resize 50% -sharpen 0x1.0 -colorspace gray -threshold 75% -crop "50%x100%" +repage "./camera/$JOURNAL/ocr/${SEQUENCE}_%d.jpg"
+  mv "./camera/$JOURNAL/ocr/${SEQUENCE}_0.jpg" "./camera/$JOURNAL/ocr/${SEQUENCE}.jpg"
+  mv "./camera/$JOURNAL/ocr/${SEQUENCE}_1.jpg" "./camera/$JOURNAL/ocr/$((SEQUENCE + 1)).jpg"
+
+  magick "./camera/$JOURNAL/orig/${SEQUENCE}.jpg" -rotate -90 -resize 50% -sharpen 0x1.0 -crop "50%x100%" +repage "./camera/$JOURNAL/${SEQUENCE}_%d.jpg"
+  mv "./camera/$JOURNAL/${SEQUENCE}_0.jpg" "./camera/$JOURNAL/${SEQUENCE}.jpg"
+  mv "./camera/$JOURNAL/${SEQUENCE}_1.jpg" "./camera/$JOURNAL/$((SEQUENCE + 1)).jpg"
   # clear_progress
 fi
