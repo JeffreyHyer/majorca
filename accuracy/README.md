@@ -28,6 +28,7 @@ Divide those two numbers to get the accuracy as a percentage.
 
 | Model                       | Accuracy |
 | :-------------------------- | -------: |
+| Opus 4.5                    |   84.85% |
 | Sonnet 4.5                  |   53.87% |
 | Sonnet 4                    |   55.28% |
 | Sonnet 3.7                  |   71.12% |

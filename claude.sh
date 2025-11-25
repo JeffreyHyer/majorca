@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -f .env]; then
+if [ -f .env ]; then
   source .env
 fi
 
@@ -13,18 +13,31 @@ if [ -z "$CLAUDE_API_KEY" ]; then
   exit 1
 fi
 
+if [ -z "$1" ]; then
+  echo "Usage: $0 <model_name> <image_file_path>"
+  exit 1
+fi
+
+if [ -z "$2" ]; then
+  echo "Usage: $0 <model_name> <image_file_path>"
+  exit 1
+fi
+
+MODEL_NAME=$1
+IMAGE_FILE=$2
+
 curl https://api.anthropic.com/v1/messages \
   -H "Content-Type: application/json" \
   -H "x-api-key: $CLAUDE_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -d '{
-    "model": "claude-haiku-4-5-20250929",
+    "model": "'"$MODEL_NAME"'",
     "max_tokens": 4096,
     "messages": [
       {
         "role": "user", 
         "content": [
-          {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": "'"$(base64 --input ./camera/1.jpg)"'"}},
+          {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": "'"$(base64 --input "$IMAGE_FILE")"'"}},
           {"type": "text", "text": "Transcribe the handwritten cursive text on the page in this image. Provide the transcription in plain text only, no other commentary or notes."}
         ]
       }
