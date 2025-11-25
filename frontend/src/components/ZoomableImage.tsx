@@ -45,7 +45,7 @@ const ZoomableImage = ({ journalId, pageId, activeLineNumber }: ZoomableImagePro
   // TODO: Pinch to zoom on Mac touchpad
   return (
     <div className="zoom-wrapper" onWheel={onMouseWheel}>
-      <img ref={imgRef} src={`../camera/${journalId}/1_orig.jpg`} onDrag={onDragImage} style={{ transform: `translate(${offsetX}px, ${offsetY}px)`, height: `${zoomHeight}px` }} />
+      <img ref={imgRef} src={`../camera/${journalId}/${pageId}.jpg`} onDrag={onDragImage} style={{ transform: `translate(${offsetX}px, ${offsetY}px)`, height: `${zoomHeight}px` }} />
     </div>
   )
 }

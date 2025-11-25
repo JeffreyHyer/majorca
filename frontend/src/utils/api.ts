@@ -32,6 +32,14 @@ export const patchJournalPage = async (journalId: string, pageId: string, data: 
   return patch(`journals/${journalId}/pages/${pageId}`, data)
 }
 
+export const getPreviousPage = async (journalId: string, pageId: string) => {
+  return get(`journals/${journalId}/pages/${pageId}/previous`)
+}
+
+export const getNextPage = async (journalId: string, pageId: string) => {
+  return get(`journals/${journalId}/pages/${pageId}/next`)
+}
+
 const get = async (url: string) => {
   return fetch(`${API_BASE_URL}${url}`).then(response => response.json())
 }

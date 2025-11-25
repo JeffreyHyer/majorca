@@ -10,8 +10,8 @@ export const getPage = async (ctx) => {
   const page = stmt.get(ctx.params.journal_id, ctx.params.id)
 
   if (page) {
-    stmt = ctx.db.prepare('SELECT id, image, model_name, text, created_at FROM results WHERE journal_id = ? AND image LIKE ?')
-    const results = stmt.all(ctx.params.journal_id, `${ctx.params.id}.jpg%`)
+    stmt = ctx.db.prepare('SELECT id, image, model_name, text, created_at FROM results WHERE journal_id = ? AND image = ?')
+    const results = stmt.all(ctx.params.journal_id, `${ctx.params.id}.jpg`)
     page.ocr_results = results ?? []
 
     ctx.body = page
@@ -112,5 +112,41 @@ export const patchPage = async (ctx) => {
     ctx.status = 500
     ctx.body = { status: 'error', error: error.message }
     return
+  }
+}
+
+export const getPreviousPage = async (ctx) => {
+  const { journal_id, id } = ctx.params
+  
+  let stmt = ctx.db.prepare('SELECT * FROM pages WHERE journal_id = ? AND id < ? ORDER BY id DESC LIMIT 1')
+  const page = stmt.get(journal_id, id)
+
+  if (page) {
+    stmt = ctx.db.prepare('SELECT id, image, model_name, text, created_at FROM results WHERE journal_id = ? AND image = ?')
+    const results = stmt.all(page.journal_id, `${page.id}.jpg`)
+    page.ocr_results = results ?? []
+
+    ctx.body = page
+  } else {
+    ctx.status = 404
+    ctx.body = { status: 'error', error: 'Page not found' }
+  }
+}
+
+export const getNextPage = async (ctx) => {
+  const { journal_id, id } = ctx.params
+  
+  let stmt = ctx.db.prepare('SELECT * FROM pages WHERE journal_id = ? AND id > ? ORDER BY id ASC LIMIT 1')
+  const page = stmt.get(journal_id, id)
+
+  if (page) {
+    stmt = ctx.db.prepare('SELECT id, image, model_name, text, created_at FROM results WHERE journal_id = ? AND image = ?')
+    const results = stmt.all(page.journal_id, `${page.id}.jpg`)
+    page.ocr_results = results ?? []
+
+    ctx.body = page
+  } else {
+    ctx.status = 404
+    ctx.body = { status: 'error', error: 'Page not found' }
   }
 }
