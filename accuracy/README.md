@@ -40,6 +40,7 @@ Divide those two numbers to get the accuracy as a percentage.
 | Gemini 2.5 Flash            |   77.11% |
 | Gemini 2.5 Flash-Lite       |   75.35% |
 | Gemini 2.0 Flash            |   72.88% |
+| GPT-5.2                     |   64.78% |
 | GPT-5.1                     |   63.73% |
 | GPT-5                       |   61.61% |
 | GPT-5 mini                  |   77.81% |
