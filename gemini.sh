@@ -25,6 +25,16 @@ fi
 
 MODEL_NAME=$1
 IMAGE_FILE=$2
+EXTRA=''
+
+if [[ "$MODEL_NAME" == "gemini-3-pro-preview" ]]; then
+  EXTRA=',
+    "generationConfig": {
+      "thinkingConfig": {
+        "thinkingLevel": "low"
+      }
+    }'
+fi
 
 curl --silent "https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent" \
   -H "Content-Type: application/json" \
@@ -45,5 +55,5 @@ curl --silent "https://generativelanguage.googleapis.com/v1beta/models/${MODEL_N
           }
         ]
       }
-    ]
+    ]'"$EXTRA"'
   }'

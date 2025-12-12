@@ -7,15 +7,17 @@ const JOURNAL = fs.readFileSync('journal.txt', 'utf8').trim().replace(' ', '_')
 const IMAGE_DIR = path.join('./camera', JOURNAL, 'ocr')
 const DB_FILE = 'db/ocr_results.sqlite'
 const SCRIPTS = {
-  'gemini-2.0-flash': ['./gemini.sh', 'gemini-2.0-flash'],
-  'gemini-2.5-flash': ['./gemini.sh', 'gemini-2.5-flash'],
+  // 'gemini-2.5-flash': ['./gemini.sh', 'gemini-2.5-flash'],
+  // 'gemini-2.0-flash': ['./gemini.sh', 'gemini-2.0-flash'],
   'gemini-2.5-flash-lite': ['./gemini.sh', 'gemini-2.5-flash-lite'],
+  'gemini-3-pro-preview': ['./gemini.sh', 'gemini-3-pro-preview'],
+  'gpt-4.1-mini': ['./openai.sh', 'gpt-4.1-mini'],
 }
 const IMAGE_EXTENSIONS = ['.jpg']
 
 const db = new Database(DB_FILE)
 
-const insertStmt = db.prepare('INSERT OR IGNORE INTO results (journal, image, model_name, json_response, input_tokens, output_tokens, thought_tokens, text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+const insertStmt = db.prepare('INSERT OR IGNORE INTO results (journal_id, image, model_name, json_response, input_tokens, output_tokens, thought_tokens, text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
 
 const processImage = async (imagePath, filename) => {
   console.log(`\nProcessing image: ${imagePath}`)
@@ -34,11 +36,21 @@ const processImage = async (imagePath, filename) => {
       }
 
       const data = JSON.parse(stdout.trim())
-      const input_tokens = data.usageMetadata?.promptTokenCount ?? 0
-      const output_tokens = data.usageMetadata?.candidatesTokenCount ?? 0
-      const thought_tokens = data.usageMetadata?.thoughtsTokenCount ?? 0
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 
+      let input_tokens, output_tokens, thought_tokens, text;
+
+      if (data?.modelVersion && data.modelVersion.indexOf('gemini') !== -1) {
+        input_tokens = data.usageMetadata?.promptTokenCount ?? 0
+        output_tokens = data.usageMetadata?.candidatesTokenCount ?? 0
+        thought_tokens = data.usageMetadata?.thoughtsTokenCount ?? 0
+        text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+      } else if (data?.model && data.model.indexOf('gpt') !== -1) {
+        input_tokens = data.usage?.prompt_tokens ?? 0
+        output_tokens = data.usage?.completion_tokens ?? 0
+        thought_tokens = 0
+        text = data.choices?.[0]?.message?.content ?? ''
+      }
+      
       const info = insertStmt.run(JOURNAL, filename, modelName, JSON.stringify(data), input_tokens, output_tokens, thought_tokens, text)
 
       if (info.changes > 0) {
